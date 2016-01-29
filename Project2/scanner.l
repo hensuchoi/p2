@@ -93,7 +93,13 @@ SINGLE_COMMENT    ("//"[^\n]*)
 "case"              { return T_Case;        }
 "default"           { return T_Default;     }
 
-
+"vec2"              { return T_Vec2;        }
+"vec3"     	    { return T_Vec3;        }
+"vec4"     	    { return T_Vec4; 	    }
+"mat2"              { return T_Mat2;        }
+"mat3"              { return T_Mat3;        }
+"mat4"              { return T_Mat4;        }
+"continue"          { return T_Continue;    }
 
  /* -------------------- Operators ----------------------------- */
 "<="                { return T_LessEqual;   }
@@ -106,6 +112,18 @@ SINGLE_COMMENT    ("//"[^\n]*)
 "++"                { return T_Inc;         }
 "--"                { return T_Dec;         }
 {OPERATOR}          { return yytext[0];     }
+
+"+="		    { return T_AddAssign;  }
+"-="		    { return T_SubAssign;  }
+"*="		    { return T_MulAssign;  }
+"/="		    { return T_DivAssign;  }
+"."                 { BEGIN(FIELD); return yytext[0]; }
+<FIELD>{IDENTIFIER} { BEGIN(N); if (strlen(yytext) > MaxIdentLen)
+                      ReportError::LongIdentifier(&yylloc, yytext);
+                      strncpy(yylval.identifier, yytext, MaxIdentLen);
+                      yylval.identifier[MaxIdentLen] = '\0';
+                      return T_FieldSelection; }
+<FIELD>.            { ReportError::UnrecogChar(&yylloc, yytext[0]); } 
 
  /* -------------------- Constants ------------------------------ */
 "true"|"false"      { yylval.boolConstant = (yytext[0] == 't');

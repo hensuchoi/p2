@@ -117,9 +117,9 @@ void yyerror(const char *msg); // standard error-handling routine
 %token   T_AddAssign T_SubAssign T_MulAssign T_DivAssign
 %token   T_Equal T_LeftAngle T_RightAngle
 %token   T_While T_For T_If T_Else T_Return T_Break
-%token   T_Vec2 T_Vec3s T_Vec4
-%token   T_Inc T_Dec T_Switch T_Case T_Default T_Do
-%token   T_Mat2 T_Mat T_Mat4
+%token   T_Vec2 T_Vec3 T_Vec4
+%token   T_Inc T_Dec T_Switch T_Case T_Default T_Do T_Continue
+%token   T_Mat2 T_Mat3 T_Mat4
 %token   T_LeftParen T _RightParen T_Colon T_Semicolon
 %token   T_LeftBrace T_RightBrace
 %token   T_Dot
