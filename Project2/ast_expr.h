@@ -207,7 +207,7 @@ class VarExpr : public Expr
   protected:
     Identifier *id;
   public:
-    VarExpr (yytype loc, Identifier *ident);
+    VarExpr (yyltype loc, Identifier *ident);
     const char *GetPrintNameForNode () { return "VarExpr"; }
     void PrintChildren (int identLevel);
 };

@@ -38,6 +38,49 @@ void yyerror(const char *msg); // standard error-handling routine
  * pp2: You will need to add new fields to this union as you add different 
  *      attributes to your non-terminal symbols.
  */
+
+%code requires {
+  struct FnHdr {
+    Identifier *name;
+    Type *type;
+  };
+
+  struct FnHdrParam {
+    struct FnHdr header;
+    List<VarDecl*> *params;
+  };
+
+  struct FnCallHdrParam {
+    Identifier *name;
+    List<Expr*> *params;
+  };
+
+  struct StmtList {
+    List<VarDecl*> *decls;
+    List<Stmt*> *stmts;
+  };
+
+  struct SelectRest {
+    Stmt *body;
+    Stmt *elseBody;
+  };
+
+  struct ForRest {
+    Expr *test;
+    Expr *step;
+  };
+
+  struct SwitchBody {
+    List<Case*> *cases;
+    Default *def;
+  };
+
+  struct DeclInit {
+    VarDecl *decl;
+    AssignExpr *assn;
+  };
+}
+
 %union {
     int integerConstant;
     bool boolConstant;
@@ -118,7 +161,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %token   T_Equal T_LeftAngle T_RightAngle
 %token   T_While T_For T_If T_Else T_Return T_Break
 %token   T_Vec2 T_Vec3 T_Vec4
-%token   T_Inc T_Dec T_Switch T_Case T_Default T_Do T_Continue
+%token   T_Switch T_Case T_Default T_Do T_Continue
 %token   T_Mat2 T_Mat3 T_Mat4
 %token   T_LeftParen T _RightParen T_Colon T_Semicolon
 %token   T_LeftBrace T_RightBrace
@@ -129,6 +172,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %token   <integerConstant> T_IntConstant
 %token   <floatConstant> T_FloatConstant
 %token   <boolConstant> T_BoolConstant
+%token	 <identifier> T_FieldSelection
 
 
 /* Non-terminal types
@@ -144,9 +188,10 @@ void yyerror(const char *msg); // standard error-handling routine
  */
 %type <declList>  DeclList 
 %type <decl>      Decl
+%type <varDecl>	  Var_Decl
 %type <ident>	  Var_Ident
 %type <expr>	  Pri_Expr
-%type <expr>	  Post_Expr
+%type <expr> 	  Post_Expr
 %type <expr>	  Unary_Expr
 %type <opt>	  Unary_Op
 %type <expr>	  Mul_Expr
@@ -158,20 +203,18 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <expr>	  Assign_Expr
 %type <opt>	  Assign_Op
 %type <expr>	  Expr
-%type <expr>	  Cons_Expr
-%type <fn>	  Fn_Prototype
-%type <fn>	  Fn_Decl
-%type <fnHdr>	  Fn_Hdr_Param
-%type <fnHdrWParam>	  Fn_Hdr
+%type <fnDecl>	  Fn_Prototype
+%type <fnDecl>	  Fn_Decl
+%type <fnHdr>	  Fn_Hdr
+%type <fnHdrParam>	  Fn_Hdr_Param
 %type <varDecl>	  Param_Declr
 %type <varDecl>	  Param_Decln  
-%type <varDecl>	  Param_Type_Spec
-%type <declList>  Init_Decl_List
 %type <declList>  Single_Decl
-%type <fullType>  Fully_Spec_Type
 %type <type>	  Type_Spec
 %type <stmt>	  Stmt
-%type <stmt>	  Stmt_No_New_Scope
+%type <_case>	  Case_Stmt
+%type <caseList>  Case_Stmt_List
+%type <_default>  Default_Stmt
 %type <stmt>	  Simple_Stmt
 %type <stmt>	  Comp_Stmt
 %type <stmtList>  Stmt_List
@@ -179,15 +222,16 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <ifStmt>	  Select_Stmt
 %type <selectStmt>	  Select_Rest_Stmt
 %type <expr>	  Cond
-%type <swtichStmt>	  Switch_Stmt
+%type <switchStmt>	  Switch_Stmt
 %type <stmtList>  Switch_Stmt_List
+%type <switchBody> Switch_Stmt_Body
 %type <intConst>  Case_Label
 %type <loopStmt>  Iterate_Stmt
 %type <expr>	  For_Init_Stmt
 %type <forRest>	  For_Rest_Stmt
 %type <declList>  Trans_Unit
 %type <decl>	  Ext_Decl
-%type <fn>	  Fn_Def
+%type <fnDecl>	  Fn_Def
 %type <program>	  Program
 
 %%
@@ -297,14 +341,14 @@ Fn_Decl		 : Fn_Hdr	    { $$ = new FnDecl($1.name, $1.type, new List<VarDecl*>())
          	 | Fn_Hdr_Param	    { $$ = new FnDecl($1.header.name, $1.header.type, $1.params); }
         	 ;
 
-Fn_Hdr_Param	 : Fn_Hdr Param_Decl		    { $$.header = $1;
-                                     ($$.params = new List<VarDecl*>())->Append($2); }
-                 | Fn_Hdr_With_Param ',' Param_Decl { $$ = $1; $$.params->Append($3); }
-                 ;
-
 Fn_Hdr		 : Type_Spec T_Identifier '(' { $$.name = new Identifier(@2, $2);
                                             $$.type = $1; }
       		 ;
+
+Fn_Hdr_Param	 : Fn_Hdr Param_Decln		    { $$.header = $1;
+                                     ($$.params = new List<VarDecl*>())->Append($2); }
+                 | Fn_Hdr_Param ',' Param_Decln { $$ = $1; $$.params->Append($3); }
+                 ;
 
 Param_Declr 	 : Type_Spec T_Identifier { $$ = new VarDecl(new Identifier(@2, $2), $1); }
           	 ;
@@ -362,7 +406,7 @@ Select_Rest_Stmt : Stmt T_Else Stmt { $$.body = $1; $$.elseBody = $3; }
                  ;
 
 Cond   		 : Expr		    { $$ = $1; }
-      		 | Type_Spec T_Identifier T_Equal Assn_Expr { VarExpr *rhs = new VarExpr(@2, new Identifier(@2, $2))
+      		 | Type_Spec T_Identifier T_Equal Assign_Expr { VarExpr *rhs = new VarExpr(@2, new Identifier(@2, $2))
                     	Operator *op = new Operator(@3, "==");
                     	$$ = new AssignExpr(rhs, op, $4); }
         	 ;
@@ -373,9 +417,8 @@ Switch_Stmt 	 : T_Switch '(' Expr ')' '{' Switch_Stmt_Body '}' { $$ = new Switch
 Case_Label 	 : T_Case T_IntConstant ':' { $$ = new IntConstant(@2, $2); }
            	 ;
 
-/*Default_Label	 : T_Default ':' {}
+Default_Label	 : T_Default ':' {}
             	 ;
-*/
 
 Switch_Stmt_List : Stmt_List { $$ = $1; }
                  ;
@@ -384,19 +427,17 @@ Case_Stmt	 : Case_Label Switch_Stmt_List	       { $$ = new Case($1, $2.stmts); }
          	 | Case_Label '{' Switch_Stmt_List '}' { $$ = new Case($1, $3.stmts); }
          	 ;
 
-/*Default_Stmt	 : Default_Label Switch_Stmt_List	  { $$ = new Default($2.stmts); }
+Default_Stmt	 : Default_Label Switch_Stmt_List	  { $$ = new Default($2.stmts); }
            	 | Default_Label '{' Switch_Stmt_List '}' { $$ = new Default($3.stmts); }
             	 ;
-*/
 
 Case_Stmt_List	 : Case_Stmt { ($$ = new List<Case*>())->Append($1); }
               	 | Case_Stmt_List Case_Stmt { ($$ = $1)->Append($2); }
               	 ;
 
-/*Switch_Stmt_Body : Case_Stmt_List { $$.cases = $1; $$.def = NULL; }
+Switch_Stmt_Body : Case_Stmt_List { $$.cases = $1; $$.def = NULL; }
                  | Case_Stmt_List Default_Stmt { $$.cases = $1; $$.def = $2; }
                  ;  
-*/
 
 Iterate_Stmt  	 : T_While '(' Cond ')' Stmt { $$ = new WhileStmt($3, $5); }
               	 | T_For '(' For_Init_Stmt For_Rest_Stmt ')' Stmt { $$ = new ForStmt($3, $4.test, $4.step, $6); }
@@ -417,11 +458,10 @@ Ext_Decl 	 : Fn_Def                { $$ = $1; }
          	 | Decl                  { $$ = $1; }
          	 ;
 
-Fn_Def		 : Fn_Proto Comp_Stmt	 { ($$ = $1)->SetFunctionBody($2); }
+Fn_Def		 : Fn_Prototype Comp_Stmt	 { ($$ = $1)->SetFunctionBody($2); }
 
-/*Decl      :    T_Void               { $$ = new VarDecl(); /* pp2: test only. Replace with correct rules   } 
-            ;
-*/          
+Decl      :    T_Void               { $$ = new VarDecl(); /* pp2: test only. Replace with correct rules */  } 
+            ;        
 
 
 %%
