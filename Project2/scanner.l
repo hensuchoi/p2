@@ -37,6 +37,7 @@ static void DoBeforeEachAction();
  */
 %s N
 %x COPY COMM
+%x FIELD
 %option stack
 
 /* Definitions
