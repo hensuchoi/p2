@@ -117,14 +117,14 @@ SINGLE_COMMENT    ("//"[^\n]*)
 "-="		    { return T_SubAssign;  }
 "*="		    { return T_MulAssign;  }
 "/="		    { return T_DivAssign;  }
-"."                 { BEGIN(FIELD); return yytext[0]; }
-<FIELD>{IDENTIFIER} { BEGIN(N); if (strlen(yytext) > MaxIdentLen)
+"."                 {BEGIN(FIELD);  return yytext[0]; }
+<FIELD>{IDENTIFIER} {BEGIN(N); if (strlen(yytext)>MaxIdentLen)
                       ReportError::LongIdentifier(&yylloc, yytext);
-                      strncpy(yylval.identifier, yytext, MaxIdentLen);
-                      yylval.identifier[MaxIdentLen] = '\0';
-                      return T_FieldSelection; }
-<FIELD>.            { ReportError::UnrecogChar(&yylloc, yytext[0]); } 
-
+		      strncpy(yylval.identifier, yytext, MaxIdentLen);
+		      yylval.identifier[MaxIdentLen] ='\0';
+		      return T_FieldSelection;}
+<FIELD>.		    {ReportError::UnrecogChar(&yylloc, yytext[0]);}
+{OPERATOR}          {return yytext[0];}
  /* -------------------- Constants ------------------------------ */
 "true"|"false"      { yylval.boolConstant = (yytext[0] == 't');
                          return T_BoolConstant; }
