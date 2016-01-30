@@ -160,7 +160,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 41 "parser.y"
+#line 84 "parser.y"
 {
     int integerConstant;
     bool boolConstant;

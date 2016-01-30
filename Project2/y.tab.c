@@ -201,6 +201,47 @@
 
 void yyerror(const char *msg); // standard error-handling routine
 
+#line 42 "parser.y"
+
+  struct FnHdr {
+    Identifier *name;
+    Type *type;
+  };
+
+  struct FnHdrParam {
+    struct FnHdr header;
+    List<VarDecl*> *params;
+  };
+
+  struct FnCallHdrParam {
+    Identifier *name;
+    List<Expr*> *params;
+  };
+
+  struct StmtList {
+    List<VarDecl*> *decls;
+    List<Stmt*> *stmts;
+  };
+
+  struct SelectRest {
+    Stmt *body;
+    Stmt *elseBody;
+  };
+
+  struct ForRest {
+    Expr *test;
+    Expr *step;
+  };
+
+  struct SwitchBody {
+    List<Case*> *cases;
+    Default *def;
+  };
+
+  struct DeclInit {
+    VarDecl *decl;
+    AssignExpr *assn;
+  };
 
 
 /* Enabling traces.  */
@@ -223,7 +264,7 @@ void yyerror(const char *msg); // standard error-handling routine
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 41 "parser.y"
+#line 84 "parser.y"
 {
     int integerConstant;
     bool boolConstant;
@@ -288,7 +329,7 @@ typedef union YYSTYPE
     Program *program;
 }
 /* Line 193 of yacc.c.  */
-#line 292 "y.tab.c"
+#line 333 "y.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -313,7 +354,7 @@ typedef struct YYLTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 317 "y.tab.c"
+#line 358 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -610,9 +651,9 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   201,   201,   213,   214,   287,   288,   291,   294,   297,
-     298,   301,   305,   307,   310,   313,   314,   317,   320,   321,
-     322,   323,   324,   325,   326,   327,   328,   329,   420
+       0,   244,   244,   256,   257,   330,   331,   334,   337,   340,
+     341,   344,   348,   350,   353,   356,   357,   360,   363,   364,
+     365,   366,   367,   368,   369,   370,   371,   372,   463
 };
 #endif
 
@@ -1574,7 +1615,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 201 "parser.y"
+#line 244 "parser.y"
     { 
                                       (yylsp[(1) - (1)]); 
                                       /* pp2: The @1 is needed to convince 
@@ -1588,140 +1629,140 @@ yyreduce:
     break;
 
   case 3:
-#line 213 "parser.y"
+#line 256 "parser.y"
     { ((yyval.declList)=(yyvsp[(1) - (2)].declList))->Append((yyvsp[(2) - (2)].decl)); }
     break;
 
   case 4:
-#line 214 "parser.y"
+#line 257 "parser.y"
     { ((yyval.declList) = new List<Decl*>)->Append((yyvsp[(1) - (1)].decl)); }
     break;
 
   case 5:
-#line 287 "parser.y"
+#line 330 "parser.y"
     { (yyval.decl) = (yyvsp[(1) - (2)].fnDecl); }
     break;
 
   case 6:
-#line 288 "parser.y"
+#line 331 "parser.y"
     { (yyval.decl) = (yyvsp[(1) - (1)].varDecl); }
     break;
 
   case 7:
-#line 291 "parser.y"
-    { (yyval.varDecl) = (yyvsp[(1) - (2)].declList); }
+#line 334 "parser.y"
+    { (yyval.varDecl) = (yyvsp[(1) - (2)].varDecl); }
     break;
 
   case 8:
-#line 294 "parser.y"
+#line 337 "parser.y"
     { (yyval.fnDecl) = (yyvsp[(1) - (2)].fnDecl); }
     break;
 
   case 9:
-#line 297 "parser.y"
+#line 340 "parser.y"
     { (yyval.fnDecl) = new FnDecl((yyvsp[(1) - (1)].fnHdr).name, (yyvsp[(1) - (1)].fnHdr).type, new List<VarDecl*>()); }
     break;
 
   case 10:
-#line 298 "parser.y"
+#line 341 "parser.y"
     { (yyval.fnDecl) = new FnDecl((yyvsp[(1) - (1)].fnHdrParam).header.name, (yyvsp[(1) - (1)].fnHdrParam).header.type, (yyvsp[(1) - (1)].fnHdrParam).params); }
     break;
 
   case 11:
-#line 301 "parser.y"
+#line 344 "parser.y"
     { (yyval.fnHdr).name = new Identifier((yylsp[(2) - (3)]), (yyvsp[(2) - (3)].identifier));
                                             (yyval.fnHdr).type = (yyvsp[(1) - (3)].type); }
     break;
 
   case 12:
-#line 305 "parser.y"
+#line 348 "parser.y"
     { (yyval.fnHdrParam).header = (yyvsp[(1) - (2)].fnHdr);
                                      ((yyval.fnHdrParam).params = new List<VarDecl*>())->Append((yyvsp[(2) - (2)].varDecl)); }
     break;
 
   case 13:
-#line 307 "parser.y"
+#line 350 "parser.y"
     { (yyval.fnHdrParam) = (yyvsp[(1) - (3)].fnHdrParam); (yyval.fnHdrParam).params->Append((yyvsp[(3) - (3)].varDecl)); }
     break;
 
   case 14:
-#line 310 "parser.y"
+#line 353 "parser.y"
     { (yyval.varDecl) = new VarDecl(new Identifier((yylsp[(2) - (2)]), (yyvsp[(2) - (2)].identifier)), (yyvsp[(1) - (2)].type)); }
     break;
 
   case 15:
-#line 313 "parser.y"
+#line 356 "parser.y"
     { (yyval.varDecl) = (yyvsp[(1) - (1)].varDecl); }
     break;
 
   case 16:
-#line 314 "parser.y"
+#line 357 "parser.y"
     { (yyval.varDecl) = new VarDecl(new Identifier((yylsp[(1) - (1)]), ""), (yyvsp[(1) - (1)].type)); }
     break;
 
   case 17:
-#line 317 "parser.y"
-    { (yyval.declList) = new VarDecl(new Identifier((yylsp[(2) - (2)]), (yyvsp[(2) - (2)].identifier)), (yyvsp[(1) - (2)].type)); }
+#line 360 "parser.y"
+    { (yyval.varDecl) = new VarDecl(new Identifier((yylsp[(2) - (2)]), (yyvsp[(2) - (2)].identifier)), (yyvsp[(1) - (2)].type)); }
     break;
 
   case 18:
-#line 320 "parser.y"
+#line 363 "parser.y"
     { (yyval.type) = Type::voidType; }
     break;
 
   case 19:
-#line 321 "parser.y"
+#line 364 "parser.y"
     { (yyval.type) = Type::floatType; }
     break;
 
   case 20:
-#line 322 "parser.y"
+#line 365 "parser.y"
     { (yyval.type) = Type::intType; }
     break;
 
   case 21:
-#line 323 "parser.y"
+#line 366 "parser.y"
     { (yyval.type) = Type::boolType; }
     break;
 
   case 22:
-#line 324 "parser.y"
+#line 367 "parser.y"
     { (yyval.type) = Type::vec2Type; }
     break;
 
   case 23:
-#line 325 "parser.y"
+#line 368 "parser.y"
     { (yyval.type) = Type::vec3Type; }
     break;
 
   case 24:
-#line 326 "parser.y"
+#line 369 "parser.y"
     { (yyval.type) = Type::vec4Type; }
     break;
 
   case 25:
-#line 327 "parser.y"
+#line 370 "parser.y"
     { (yyval.type) = Type::mat2Type; }
     break;
 
   case 26:
-#line 328 "parser.y"
+#line 371 "parser.y"
     { (yyval.type) = Type::mat3Type; }
     break;
 
   case 27:
-#line 329 "parser.y"
+#line 372 "parser.y"
     { (yyval.type) = Type::mat4Type; }
     break;
 
   case 28:
-#line 420 "parser.y"
+#line 463 "parser.y"
     { (yyval.decl) = new VarDecl(); /* pp2: test only. Replace with correct rules */  }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1725 "y.tab.c"
+#line 1766 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1941,7 +1982,7 @@ yyreturn:
 }
 
 
-#line 424 "parser.y"
+#line 467 "parser.y"
 
 
 /* The closing %% above marks the end of the Rules section and the beginning

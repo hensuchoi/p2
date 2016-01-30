@@ -39,7 +39,7 @@ void yyerror(const char *msg); // standard error-handling routine
  *      attributes to your non-terminal symbols.
  */
 
-%code requires {
+%{
   struct FnHdr {
     Identifier *name;
     Type *type;
@@ -79,7 +79,7 @@ void yyerror(const char *msg); // standard error-handling routine
     VarDecl *decl;
     AssignExpr *assn;
   };
-}
+%}
 
 %union {
     int integerConstant;
@@ -209,7 +209,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <fnHdrParam>	  Fn_Hdr_Param
 %type <varDecl>	  Param_Declr
 %type <varDecl>	  Param_Decln  
-%type <declList>  Single_Decl
+%type <varDecl>  Single_Decl
 %type <type>	  Type_Spec
 %type <stmt>	  Stmt
 %type <_case>	  Case_Stmt
