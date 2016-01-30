@@ -1,4 +1,4 @@
-Useless nonterminals
+Nonterminals useless in grammar
 
    Var_Ident
    Pri_Expr
@@ -38,7 +38,7 @@ Useless nonterminals
    Fn_Def
 
 
-Terminals which are not used
+Terminals unused in grammar
 
    T_LessEqual
    T_GreaterEqual
@@ -98,7 +98,7 @@ Terminals which are not used
    ':'
 
 
-Useless rules
+Rules useless in grammar
 
    28 Var_Ident: T_Identifier
 
