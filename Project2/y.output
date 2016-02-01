@@ -104,8 +104,8 @@ Rules useless in grammar
 
    29 Pri_Expr: Var_Ident
    30         | T_IntConstant
-   31         | T_FloatConstant
-   32         | T_BoolConstant
+   31         | T_BoolConstant
+   32         | T_FloatConstant
    33         | '(' Expr ')'
 
    34 Post_Expr: Pri_Expr
@@ -114,8 +114,8 @@ Rules useless in grammar
    37          | Post_Expr T_Dec
 
    38 Unary_Expr: Post_Expr
-   39           | T_Inc Unary_Expr
-   40           | T_Dec Unary_Expr
+   39           | T_Dec Unary_Expr
+   40           | T_Inc Unary_Expr
    41           | Unary_Op Unary_Expr
 
    42 Unary_Op: '+'
