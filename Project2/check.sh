@@ -25,7 +25,7 @@ for file in $LIST; do
 	fi
 
 	tmp=${TMP:-"/tmp"}/check.tmp
-	./dcc < $base.$ext 1>$tmp 2>&1
+	./glc < $base.$ext 1>$tmp 2>&1
 
 	printf "Checking %-27s: " $file
 	if ! cmp -s $tmp $file; then

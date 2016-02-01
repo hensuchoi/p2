@@ -442,8 +442,8 @@ static void yy_fatal_error (yyconst char msg[]  );
 	(yy_c_buf_p) = yy_cp;
 
 /* %% [4.0] data tables for the DFA and the user's section 1 definitions go here */
-#define YY_NUM_RULES 52
-#define YY_END_OF_BUFFER 53
+#define YY_NUM_RULES 53
+#define YY_END_OF_BUFFER 54
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -454,21 +454,21 @@ struct yy_trans_info
 static yyconst flex_int16_t yy_accept[148] =
     {   0,
         0,    0,    0,    0,    1,    1,    0,    0,    0,    0,
-       53,   51,    4,    2,    3,   38,   38,   51,   38,   38,
-       38,   38,   38,   47,   47,   38,   38,   38,   50,   38,
-       50,   50,   50,   50,   50,   50,   50,   50,   50,   50,
-       50,   50,   51,    1,    1,    7,    4,    7,   45,    4,
+       54,   52,    4,    2,    3,   38,   38,   52,   38,   38,
+       38,   38,   38,   48,   48,   38,   38,   38,   51,   38,
+       51,   51,   51,   51,   51,   51,   51,   51,   51,   51,
+       51,   51,   52,    1,    1,    7,    4,    7,   45,    4,
        44,    3,   32,   33,   41,   36,   39,   37,   40,    5,
-        8,   42,   49,   47,    0,   29,   31,   30,   50,   35,
-       50,   50,   50,   50,   50,   50,   50,   50,   50,   15,
-       50,   50,   50,   50,   50,   50,   50,   50,   34,    1,
-        6,   44,    8,   49,   49,   48,   50,   50,   50,   50,
+        8,   42,   50,   48,    0,   29,   31,   30,   51,   35,
+       51,   51,   51,   51,   51,   51,   51,   51,   51,   15,
+       51,   51,   51,   51,   51,   51,   51,   51,   34,    1,
+        6,   44,    8,   50,   50,   49,   51,   51,   51,   51,
 
-       50,   50,   50,   50,   14,   10,   50,   50,   50,   50,
-       50,   50,   50,   12,   50,   20,   50,   50,   16,   50,
-       50,   25,   26,   27,   50,   50,   46,   22,   23,   24,
-        9,   50,   18,   50,   50,   11,   50,   50,   13,   50,
-       50,   17,   19,   50,   21,   28,    0
+       51,   51,   51,   51,   14,   10,   51,   51,   51,   51,
+       51,   51,   51,   12,   51,   20,   51,   51,   16,   51,
+       51,   25,   26,   27,   51,   51,   47,   22,   23,   24,
+        9,   51,   18,   51,   51,   11,   51,   51,   13,   51,
+       51,   17,   19,   51,   21,   28,    0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -634,14 +634,14 @@ static char *yy_last_accepting_cpos;
 extern int yy_flex_debug;
 int yy_flex_debug = 1;
 
-static yyconst flex_int16_t yy_rule_linenum[52] =
+static yyconst flex_int16_t yy_rule_linenum[53] =
     {   0,
        61,   66,   70,   71,   74,   75,   78,   79,   83,   84,
        85,   86,   87,   88,   89,   90,   91,   92,   93,   94,
        95,   97,   98,   99,  100,  101,  102,  103,  106,  107,
       108,  109,  110,  111,  112,  113,  114,  115,  117,  118,
-      119,  120,  121,  122,  127,  130,  132,  134,  136,  141,
-      149
+      119,  120,  121,  122,  127,  128,  130,  132,  134,  136,
+      141,  149
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -1045,13 +1045,13 @@ do_action:	/* This label is used only to access EOF actions. */
 			{
 			if ( yy_act == 0 )
 				fprintf( stderr, "--scanner backing up\n" );
-			else if ( yy_act < 52 )
+			else if ( yy_act < 53 )
 				fprintf( stderr, "--accepting rule at line %ld (\"%s\")\n",
 				         (long)yy_rule_linenum[yy_act], yytext );
-			else if ( yy_act == 52 )
+			else if ( yy_act == 53 )
 				fprintf( stderr, "--accepting default rule (\"%s\")\n",
 				         yytext );
-			else if ( yy_act == 53 )
+			else if ( yy_act == 54 )
 				fprintf( stderr, "--(end of buffer or a NUL)\n" );
 			else
 				fprintf( stderr, "--EOF (start condition %d)\n", YY_START );
@@ -1298,49 +1298,54 @@ YY_RULE_SETUP
 case 43:
 YY_RULE_SETUP
 #line 121 "scanner.l"
-{ BEGIN(FIELD); return yytext[0]; }
+{BEGIN(FIELD);  return yytext[0]; }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
 #line 122 "scanner.l"
-{ BEGIN(N); if (strlen(yytext) > MaxIdentLen)
+{BEGIN(N); if (strlen(yytext)>MaxIdentLen)
                       ReportError::LongIdentifier(&yylloc, yytext);
-                      strncpy(yylval.identifier, yytext, MaxIdentLen);
-                      yylval.identifier[MaxIdentLen] = '\0';
-                      return T_FieldSelection; }
+		      strncpy(yylval.identifier, yytext, MaxIdentLen);
+		      yylval.identifier[MaxIdentLen] ='\0';
+		      return T_FieldSelection;}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
 #line 127 "scanner.l"
-{ ReportError::UnrecogChar(&yylloc, yytext[0]); } 
+{ReportError::UnrecogChar(&yylloc, yytext[0]);}
+	YY_BREAK
+case 46:
+YY_RULE_SETUP
+#line 128 "scanner.l"
+{return yytext[0];}
 	YY_BREAK
 /* -------------------- Constants ------------------------------ */
-case 46:
+case 47:
 YY_RULE_SETUP
 #line 130 "scanner.l"
 { yylval.boolConstant = (yytext[0] == 't');
                          return T_BoolConstant; }
 	YY_BREAK
-case 47:
+case 48:
 YY_RULE_SETUP
 #line 132 "scanner.l"
 { yylval.integerConstant = strtol(yytext, NULL, 10);
                          return T_IntConstant; }
 	YY_BREAK
-case 48:
+case 49:
 YY_RULE_SETUP
 #line 134 "scanner.l"
 { yylval.integerConstant = strtol(yytext, NULL, 16);
                          return T_IntConstant; }
 	YY_BREAK
-case 49:
+case 50:
 YY_RULE_SETUP
 #line 136 "scanner.l"
 { yylval.doubleConstant = atof(yytext);
                          return T_FloatConstant; }
 	YY_BREAK
 /* -------------------- Identifiers --------------------------- */
-case 50:
+case 51:
 YY_RULE_SETUP
 #line 141 "scanner.l"
 { if (strlen(yytext) > MaxIdentLen)
@@ -1350,17 +1355,17 @@ YY_RULE_SETUP
                        return T_Identifier; }
 	YY_BREAK
 /* -------------------- Default rule (error) -------------------- */
-case 51:
+case 52:
 YY_RULE_SETUP
 #line 149 "scanner.l"
 { ReportError::UnrecogChar(&yylloc, yytext[0]); }
 	YY_BREAK
-case 52:
+case 53:
 YY_RULE_SETUP
 #line 151 "scanner.l"
 ECHO;
 	YY_BREAK
-#line 1364 "lex.yy.c"
+#line 1369 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(N):
 case YY_STATE_EOF(FIELD):
