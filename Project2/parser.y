@@ -84,13 +84,13 @@ void yyerror(const char *msg); // standard error-handling routine
 %union {
     int integerConstant;
     bool boolConstant;
+    float floatConstant;
     char *stringConstant;
     double doubleConstant;
     char identifier[MaxIdentLen+1]; // +1 for terminating null
     Decl *decl;
     List<Decl*> *declList;
     IntConstant *intConst;
-    FloatConstant *floatConst;
     BoolConstant *boolConst;
     Node *node;
     Identifier *ident;
@@ -153,26 +153,25 @@ void yyerror(const char *msg); // standard error-handling routine
  * in the generated y.tab.h header file.
  */
 %token   T_Void T_Bool T_Int T_Float 
-%token   T_LessEqual T_GreaterEqual T_EqualOp T_NotEqual T_Dims
+%token   T_LessEqual T_GreaterEqual T_EQ T_NE T_LeftAngle T_RightAngle
 %token   T_And T_Or
-%token   T_Inc T_Dec T_Plus T_Dash
-%token   T_Star T_Slash
-%token   T_AddAssign T_SubAssign T_MulAssign T_DivAssign
-%token   T_Equal T_LeftAngle T_RightAngle
+%token   T_Equal T_MulAssign T_DivAssign T_AddAssign T_SubAssign
 %token   T_While T_For T_If T_Else T_Return T_Break
-%token   T_Vec2 T_Vec3 T_Vec4
-%token   T_Switch T_Case T_Default T_Do T_Continue
-%token   T_Mat2 T_Mat3 T_Mat4
-%token   T_LeftParen T _RightParen T_Colon T_Semicolon
-%token   T_LeftBrace T_RightBrace
-%token   T_Dot
-%token   T_LeftBracket T_RightBracket
+%token   T_Const T_Uniform T_Layout T_Continue T_Do
+%token   T_Inc T_Dec T_Switch T_Case T_Default
+%token   T_In T_Out T_InOut
+%token   T_Mat2 T_Mat3 T_Mat4  T_Vec2 T_Vec3 T_Vec4
+%token   T_Ivec2 T_Ivec3 T_Ivec4 T_Bvec2 T_Bvec3 T_Bvec4
+%token   T_Uint T_Uvec2 T_Uvec3 T_Uvec4 T_Struct
+%token   T_Semicolon T_Dot T_Colon T_Question T_Comma
+%token   T_Dash T_Plus T_Star T_Slash
+%token   T_LeftParen T _RightParen T_LeftBracket T_RightBracket T_LeftBrace T_RightBrace
+
 
 %token   <identifier> T_Identifier
 %token   <integerConstant> T_IntConstant
 %token   <floatConstant> T_FloatConstant
 %token   <boolConstant> T_BoolConstant
-%token	 <identifier> T_FieldSelection
 
 
 /* Non-terminal types
@@ -188,14 +187,15 @@ void yyerror(const char *msg); // standard error-handling routine
  */
 %type <declList>  DeclList 
 %type <decl>      Decl
-%type <varDecl>	  Var_Decl
-%type <ident>	  Var_Ident
+%type <varDecl>	  V_Declaration
+%type <ident>	  V_Identifier
 %type <expr>	  Pri_Expr
 %type <expr> 	  Post_Expr
 %type <expr>	  Unary_Expr
 %type <opt>	  Unary_Op
-%type <expr>	  Mul_Expr
-%type <expr>	  Add_Expr
+%type <expr>	  Multiplicative_Expr
+%type <expr>	  Additive_Expr
+%type <expr>      Shift_Expr
 %type <expr>	  Rel_Expr
 %type <expr>	  Equal_Expr
 %type <expr>	  Logical_And_Expr
@@ -257,10 +257,10 @@ DeclList  :    DeclList Decl        { ($$=$1)->Append($2); }
           |    Decl                 { ($$ = new List<Decl*>)->Append($1); }
           ;
 
-Var_Ident :    T_Identifier	    { $$ = new Identifier(@1, $1); }
+V_Identifier :    T_Identifier	    { $$ = new Identifier(@1, $1); }
           ;
 
-Pri_Expr  :    Var_Ident	    { $$ = new VarExpr(@1, $1); }
+Pri_Expr  :    V_Identifier	    { $$ = new VarExpr(@1, $1); }
           |    T_IntConstant	    { $$ = new IntConstant(@1, $1); }
 	  |    T_BoolConstant	    { $$ = new BoolConstant(@1, $1); }     
 	  |    T_FloatConstant 	    { $$ = new FloatConstant(@1, $1); }
@@ -285,21 +285,25 @@ Unary_Op  :    '+'		    { $$ = new Operator(@1,"+"); }
      	  |    '-' 		    { $$ = new Operator(@1,"-"); }
     	  ;
 
-Mul_Expr  :    Unary_Expr 	    { $$ = $1; }
-          |    Mul_Expr '*' Unary_Expr { $$ = new ArithmeticExpr($1,new Operator(@2,"*"),$3); }
-          |    Mul_Expr '/' Unary_Expr { $$ = new ArithmeticExpr($1,new Operator(@2,"/"),$3); }
+Multiplicative_Expr  :    Unary_Expr 	    { $$ = $1; }
+          |    Multiplicative_Expr '*' Unary_Expr { $$ = new ArithmeticExpr($1,new Operator(@2,"*"),$3); }
+          |    Multiplicative_Expr '/' Unary_Expr { $$ = new ArithmeticExpr($1,new Operator(@2,"/"),$3); }
 
 
-Add_Expr  :    Mul_Expr		    { $$ = $1; }
-                  |    Add_Expr '+' Mul_Expr { $$ = new ArithmeticExpr($1,new Operator(@2,"+"),$3); }
-                  |    Add_Expr '-' Mul_Expr { $$ = new ArithmeticExpr($1,new Operator(@1,"-"),$3); }
+Additive_Expr  :    Multiplicative_Expr		    { $$ = $1; }
+                  |    Additive_Expr '+' Multiplicative_Expr { $$ = new ArithmeticExpr($1,new Operator(@2,"+"),$3); }
+                  |    Additive_Expr '-' Multiplicative_Expr { $$ = new ArithmeticExpr($1,new Operator(@1,"-"),$3); }
                   ;
 
-Rel_Expr  :    Add_Expr		    { $$ = $1; }
-          |    Rel_Expr '<' Add_Expr { $$ = new RelationalExpr($1,new Operator(@2,"<"),$3); }
-          |    Rel_Expr '>' Add_Expr { $$ = new RelationalExpr($1,new Operator(@2,">"),$3); }
-          |    Rel_Expr T_LessEqual Add_Expr	{ $$ = new RelationalExpr($1,new Operator(@2,"<="),$3); }
-          |    Rel_Expr T_GreaterEqual Add_Expr { $$ = new RelationalExpr($1,new Operator(@2,">"),$3); }
+
+Shift_Expr    :    Additive_Expr   {$$ = $1;}
+	      ;	
+
+Rel_Expr  :    Additive_Expr		    { $$ = $1; }
+          |    Rel_Expr '<' Additive_Expr { $$ = new RelationalExpr($1,new Operator(@2,"<"),$3); }
+          |    Rel_Expr '>' Additive_Expr { $$ = new RelationalExpr($1,new Operator(@2,">"),$3); }
+          |    Rel_Expr T_LessEqual Additive_Expr	{ $$ = new RelationalExpr($1,new Operator(@2,"<="),$3); }
+          |    Rel_Expr T_GreaterEqual Additive_Expr { $$ = new RelationalExpr($1,new Operator(@2,">"),$3); }
           ;
 
 Equal_Expr:    Rel_Expr   	    { $$ = $1; }
@@ -330,10 +334,10 @@ Expr		 : Assign_Expr	    { $$ = $1; }
     		 ;
 
 Decl 		 : Fn_Prototype ';' { $$ = $1; }
-    	 	 | Var_Decl	    { $$ = $1; }
+    	 	 | V_Declaration	    { $$ = $1; }
     		 ;
 
-Var_Decl	 : Single_Decl ';'  { $$ = $1; }
+V_Declaration	 : Single_Decl ';'  { $$ = $1; }
       		 ;
 
 Fn_Prototype	 : Fn_Decl ')'	    { $$ = $1; }
@@ -390,10 +394,10 @@ Comp_Stmt 	 : '{' '}'  	     { $$ = new StmtBlock(new List<VarDecl*>(), new List
 
 Stmt_List  	 : Stmt		      { $$.decls = new List<VarDecl*>();
                     	   ($$.stmts = new List<Stmt*>())->Append($1); }
-            	 | Var_Decl 	      { $$.stmts = new List<Stmt*>();
+            	 | V_Declaration 	      { $$.stmts = new List<Stmt*>();
                    	($$.decls = new List<VarDecl*>())->Append($1); }
            	 | Stmt_List Stmt     { $$ = $1; $$.stmts->Append($2); }
-           	 | Stmt_List Var_Decl { $$ = $1; $$.decls->Append($2); }
+           	 | Stmt_List V_Declaration { $$ = $1; $$.decls->Append($2); }
            	 ;
 
 Expr_Stmt  	 : ';'	    { $$ = new EmptyExpr(); }
